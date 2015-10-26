@@ -1,0 +1,38 @@
+###Instala os pacotes necessários
+install.packages("httr")
+install.packages("base64enc")
+install.packages("devtools")
+library(devtools)
+devtools::install_github("jrowen/twitteR", ref = "oauth_httr_1_0")
+library(httr)
+library(twitteR)
+library(base64enc)
+
+####Configura o Oauth no Twitter
+consumer_key <- <insere código aqui>
+consumer_secret <-<insere código aqui>
+access_token <- <insere código aqui>
+access_secret <- <insere código aqui>
+setup_twitter_oauth(consumer_key,
+                    consumer_secret,
+                    access_token,
+                    access_secret)
+
+####Baixa todos os tuites e converte para data frame
+listacompleta=searchTwitter("#primeiroassedio", n=100000)
+df=twListToDF(listacompleta)
+
+####Filtra os tuites que não são RT e que tem a palavra "anos"
+dfrt=df[which(df$isRetweet=="FALSE"),]
+dfanos=dfrt[grep("anos",dfrt$text),]
+
+####Extrai a idade
+dfanos$ano=as.numeric(gsub(" anos", "",str_extract(dfanos$text, "[0-9]+ anos")))
+dfanos=dfanos[-which(dfanos$ano > 20),]
+
+###Faz um gráfico de percentuais
+anostabela=as.data.frame(table(dfanos$ano))
+xxp=prop.table(anostabela$Freq)
+xx2=xxp*100
+xxx$Percentual=xx2
+ggplot(xxx,aes(x=Var1,y=Percentual))+geom_bar(stat = "identity")
